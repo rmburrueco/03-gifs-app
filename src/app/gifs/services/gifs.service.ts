@@ -41,7 +41,7 @@ export class GifsService {
     this.http.get<SearchResponse>(`${ this.serviceUrl }/search`, { params } ) //sería {params: params} redundante en ECMS6
       .subscribe( resp =>{
         this.gifList = resp.data;
-        console.log( {gifs: this.gifList} );      
+        //console.log( {gifs: this.gifList} );      
       });
     
     
