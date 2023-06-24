@@ -29,9 +29,9 @@ export class GifsService {
     if(tag.length === 0) return;
     this.organizeHistory(tag);
 
-    fetch('https://api.giphy.com/v1/gifs/search?api_key=ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S&q=valorant&limit=10')
-      .then( resp => resp.json() )
-      .then( data => console.log(data));
+    const resp = await fetch('https://api.giphy.com/v1/gifs/search?api_key=ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S&q=valorant&limit=10')
+    const data = await resp.json();
+    console.log(data);
 
   }
 
