@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -6,9 +7,10 @@ import { Injectable } from '@angular/core';
 export class GifsService {
 
   private _tagsHistory: string[] = [];
-  private apiKey: string = 'ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S';
+  private apiKey:       string = 'ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S';
+  private serviceUrl:   string = 'https://api.giphy.com/v1/gifs';
 
-  constructor() { }
+  constructor( private http:HttpClient ) { }
 
   get tagsHistory(){
     return [...this._tagsHistory]; //hace una copia del array (en lugar de pasar por referencia)
@@ -25,13 +27,21 @@ export class GifsService {
     this._tagsHistory = this.tagsHistory.splice(0,10);
   }
 
-  async searchTag( tag:string ): Promise<void> {
+  searchTag( tag:string ): void {
     if(tag.length === 0) return;
     this.organizeHistory(tag);
 
-    const resp = await fetch('https://api.giphy.com/v1/gifs/search?api_key=ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S&q=valorant&limit=10')
-    const data = await resp.json();
-    console.log(data);
+    const params = new HttpParams()
+      .set('api_key', this.apiKey)
+      .set('limit', '10')
+      .set('q', tag);
+
+    this.http.get(`${ this.serviceUrl }/search`, { params } ) //sería {params: params} redundante en ECMS6
+      .subscribe( resp =>{
+        console.log(resp);
+      });
+    
+    
 
   }
 
