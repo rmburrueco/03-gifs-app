@@ -3,34 +3,49 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Gif, SearchResponse } from '../interfaces/gifs.interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GifsService {
-
   public gifList: Gif[] = [];
   private _tagsHistory: string[] = [];
-  private apiKey:       string = 'ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S';
-  private serviceUrl:   string = 'https://api.giphy.com/v1/gifs';
+  private apiKey: string = 'ApcSkiWk0qDJTzVf7s7KgUrwDJNXHj8S';
+  private serviceUrl: string = 'https://api.giphy.com/v1/gifs';
 
-  constructor( private http:HttpClient ) { }
+  constructor(private http: HttpClient) {
+    this.loadLocalStorage();
+  }
 
-  get tagsHistory(){
+  get tagsHistory() {
     return [...this._tagsHistory]; //hace una copia del array (en lugar de pasar por referencia)
   }
 
   private organizeHistory(tag: string) {
     tag = tag.toLowerCase();
 
-    if ( this._tagsHistory.includes(tag) ){
-      this._tagsHistory = this.tagsHistory.filter( (oldTag) => oldTag !== tag );
+    if (this._tagsHistory.includes(tag)) {
+      this._tagsHistory = this.tagsHistory.filter((oldTag) => oldTag !== tag);
     }
 
-    this._tagsHistory.unshift( tag );
-    this._tagsHistory = this.tagsHistory.splice(0,10);
+    this._tagsHistory.unshift(tag);
+    this._tagsHistory = this.tagsHistory.splice(0, 10);
+    this.saveLocalStorage();
   }
 
-  searchTag( tag:string ): void {
-    if(tag.length === 0) return;
+  private saveLocalStorage(): void {
+    localStorage.setItem('history', JSON.stringify(this._tagsHistory));
+  }
+
+  private loadLocalStorage(): void {
+    if (!localStorage.getItem('history')) return;
+
+    this._tagsHistory = JSON.parse(localStorage.getItem('history')!); //Usamos el operador not null
+    if (this._tagsHistory.length === 0) return;
+
+    this.searchTag(this._tagsHistory[0]);
+  }
+
+  searchTag(tag: string): void {
+    if (tag.length === 0) return;
     this.organizeHistory(tag);
 
     const params = new HttpParams()
@@ -38,14 +53,11 @@ export class GifsService {
       .set('limit', '10')
       .set('q', tag);
 
-    this.http.get<SearchResponse>(`${ this.serviceUrl }/search`, { params } ) //sería {params: params} redundante en ECMS6
-      .subscribe( resp =>{
+    this.http
+      .get<SearchResponse>(`${this.serviceUrl}/search`, { params }) //sería {params: params} redundante en ECMS6
+      .subscribe((resp) => {
         this.gifList = resp.data;
-        //console.log( {gifs: this.gifList} );      
+        //console.log( {gifs: this.gifList} );
       });
-    
-    
-
   }
-
 }
